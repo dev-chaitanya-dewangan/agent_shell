@@ -1,0 +1,37 @@
+---
+project_name: agentShell
+current_phase: Phase 1 (Core Foundation)
+current_step: Step 1 (Project Setup & Basic UI Framework)
+status: In Progress
+
+goals:
+  - Setup basic Jetpack Compose scaffold and Navigation (Brutalist UI).
+  - Setup Terminal Session integration (pty4j + Terminal UI) to allow simple execution.
+  - Setup Local LLM interface (MediaPipe).
+  - Build the core loop: Prompt -> LLM -> Parse -> ToolDispatcher -> Run Command -> Terminal output.
+
+completed_tasks:
+  - Initialized Native Kotlin project with Gradle.
+  - Setup Hilt structure in gradle files.
+  - Created Color.kt, Theme.kt, Shape.kt with Brutalist tokens.
+  - Initialized git repository.
+  - Documented PRD breakdown into documents.
+  - Create Typography.kt matching PRD (JetBrains Mono).
+  - Build AppNavGraph.kt (Shell, Chat, Apps).
+  - Implement base UI Components (ShellPanel, ShellButton, ShellInput) as per PRD.
+
+pending_tasks:
+  - Setup UI testing framework in Gradle.
+  - Build Terminal Emulator core logic.
+
+recent_changes:
+  - scaffolded basic android project.
+  - initialized Git tracking.
+
+architecture_notes:
+  - Enforcing 0dp border radius everywhere (Brutalist constraint).
+  - JetBrains Mono is the universal font.
+  - Adhering to Clean Architecture (UI -> Domain -> Data).
+  - Using Compose for all UI.
+  - State tracking in `llm_state` directory for efficient context re-loading.
+---

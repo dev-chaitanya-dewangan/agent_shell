@@ -1,4 +1,4 @@
-﻿package dev.agentshell.app
+package dev.agentshell.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import dev.agentshell.app.ui.theme.AgentShellTheme
 import dev.agentshell.app.ui.theme.AgentShellColors
+import dev.agentshell.app.ui.nav.AppNavGraph
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -19,17 +20,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AgentShellTheme {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(AgentShellColors.Shell0),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "[SYS] / INIT Â·Â·Â·",
-                        color = AgentShellColors.Amber
-                    )
-                }
+                AppNavGraph()
             }
         }
     }

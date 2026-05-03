@@ -1,4 +1,4 @@
-﻿package dev.agentshell.app.ui.theme
+package dev.agentshell.app.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -21,6 +21,7 @@ fun AgentShellTheme(
     MaterialTheme(
         colorScheme = DarkColorScheme,
         shapes = AgentShellShapes,
+        typography = AgentShellTypography,
         content = content
     )
 }
