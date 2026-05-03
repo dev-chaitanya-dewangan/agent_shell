@@ -19,10 +19,11 @@ completed_tasks:
   - Create Typography.kt matching PRD (JetBrains Mono).
   - Build AppNavGraph.kt (Shell, Chat, Apps).
   - Implement base UI Components (ShellPanel, ShellButton, ShellInput) as per PRD.
+  - Build Terminal Emulator core logic (TerminalSession via ProcessBuilder, TerminalScreen).
 
 pending_tasks:
   - Setup UI testing framework in Gradle.
-  - Build Terminal Emulator core logic.
+  - Build LLM Engine Interface.
 
 recent_changes:
   - scaffolded basic android project.

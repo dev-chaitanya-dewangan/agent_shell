@@ -13,12 +13,17 @@ import androidx.compose.ui.graphics.SolidColor
 import dev.agentshell.app.ui.theme.AgentShellColors
 import dev.agentshell.app.ui.theme.AgentShellTypography
 
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+
 @Composable
 fun ShellInput(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = ""
+    placeholder: String = "",
+    onSubmit: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
@@ -39,6 +44,9 @@ fun ShellInput(
             modifier = Modifier.fillMaxWidth(),
             textStyle = AgentShellTypography.bodyLarge.copy(color = AgentShellColors.TermCmd),
             cursorBrush = SolidColor(AgentShellColors.TermCur),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = { onSubmit() }),
+            singleLine = true,
             decorationBox = { innerTextField ->
                 if (value.isEmpty() && placeholder.isNotEmpty()) {
                     Text(

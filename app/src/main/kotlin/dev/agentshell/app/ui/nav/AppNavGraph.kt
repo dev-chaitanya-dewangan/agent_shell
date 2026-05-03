@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import dev.agentshell.app.ui.theme.AgentShellColors
 import dev.agentshell.app.ui.theme.AgentShellTypography
 
+import dev.agentshell.app.terminal.TerminalScreen
+
 @Composable
 fun AppNavGraph() {
     var currentRoute by remember { mutableStateOf(NavRoute.SHELL) }
@@ -35,7 +37,7 @@ fun AppNavGraph() {
                 .padding(innerPadding)
         ) {
             when (currentRoute) {
-                NavRoute.SHELL -> PlaceholderScreen("Terminal Environment")
+                NavRoute.SHELL -> TerminalScreen()
                 NavRoute.CHAT -> PlaceholderScreen("Agent Chat Interface")
                 NavRoute.APPS -> PlaceholderScreen("Mini Apps")
                 NavRoute.SETTINGS -> PlaceholderScreen("Settings")
