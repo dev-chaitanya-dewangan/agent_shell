@@ -20,10 +20,13 @@ completed_tasks:
   - Build AppNavGraph.kt (Shell, Chat, Apps).
   - Implement base UI Components (ShellPanel, ShellButton, ShellInput) as per PRD.
   - Build Terminal Emulator core logic (TerminalSession via ProcessBuilder, TerminalScreen).
+  - Build LLM Engine Interface and OpenRouter implementation.
+  - Implement AgentLoopManager, ToolDispatcher, ResponseParser.
+  - Added Programmatic Unit Tests for AgentLoopManager, ResponseParser, and Components.
 
 pending_tasks:
-  - Setup UI testing framework in Gradle.
-  - Build LLM Engine Interface.
+  - Connect AgentLoopManager to ChatScreen UI.
+  - Implement Hilt Dependency Injection across ViewModels.
 
 recent_changes:
   - scaffolded basic android project.
