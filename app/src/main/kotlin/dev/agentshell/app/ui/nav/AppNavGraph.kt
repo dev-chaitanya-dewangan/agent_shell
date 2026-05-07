@@ -1,5 +1,7 @@
 package dev.agentshell.app.ui.nav
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,21 +15,51 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import dev.agentshell.app.chat.ChatScreen
+import dev.agentshell.app.terminal.TerminalScreen
+import dev.agentshell.app.ui.splash.SplashScreen
 import dev.agentshell.app.ui.theme.AgentShellColors
 import dev.agentshell.app.ui.theme.AgentShellTypography
 
-import dev.agentshell.app.terminal.TerminalScreen
-
+/**
+ * Root navigation host.
+ *
+ * Shows [SplashScreen] on first launch, then transitions to the main
+ * bottom-nav scaffold via a Crossfade.  All four tabs (SHELL, CHAT,
+ * APPS, SETTINGS) live inside the Scaffold.
+ */
 @Composable
 fun AppNavGraph() {
+    var splashComplete by remember { mutableStateOf(false) }
     var currentRoute by remember { mutableStateOf(NavRoute.SHELL) }
 
+    Crossfade(
+        targetState = splashComplete,
+        animationSpec = tween(400),
+        label = "splash_crossfade"
+    ) { ready ->
+        if (!ready) {
+            SplashScreen(onAnimationComplete = { splashComplete = true })
+        } else {
+            MainScaffold(
+                currentRoute = currentRoute,
+                onNavigate = { currentRoute = it }
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainScaffold(
+    currentRoute: NavRoute,
+    onNavigate: (NavRoute) -> Unit
+) {
     Scaffold(
         containerColor = AgentShellColors.Shell0,
         bottomBar = {
             BottomNavBar(
                 currentRoute = currentRoute,
-                onNavigate = { route -> currentRoute = route }
+                onNavigate = onNavigate
             )
         }
     ) { innerPadding ->
@@ -37,10 +69,10 @@ fun AppNavGraph() {
                 .padding(innerPadding)
         ) {
             when (currentRoute) {
-                NavRoute.SHELL -> TerminalScreen()
-                NavRoute.CHAT -> PlaceholderScreen("Agent Chat Interface")
-                NavRoute.APPS -> PlaceholderScreen("Mini Apps")
-                NavRoute.SETTINGS -> PlaceholderScreen("Settings")
+                NavRoute.SHELL    -> TerminalScreen()
+                NavRoute.CHAT     -> ChatScreen()
+                NavRoute.APPS     -> PlaceholderScreen("MINI APPS")
+                NavRoute.SETTINGS -> PlaceholderScreen("SETTINGS")
             }
         }
     }
@@ -57,6 +89,11 @@ fun PlaceholderScreen(title: String) {
                 text = "[SYS] / $title",
                 color = AgentShellColors.Amber,
                 style = AgentShellTypography.bodyLarge
+            )
+            Text(
+                text = "// COMING SOON",
+                color = AgentShellColors.Text3,
+                style = AgentShellTypography.labelSmall
             )
         }
     }

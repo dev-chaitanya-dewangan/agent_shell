@@ -6,6 +6,12 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
+// Read OPENROUTER_API_KEY from local.properties (never commit keys to git)
+val localProps = java.util.Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) load(f.inputStream())
+}
+
 android {
     namespace = "dev.agentshell.app"
     compileSdk = 35
@@ -14,13 +20,20 @@ android {
         applicationId = "dev.agentshell.app"
         minSdk = 31
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Expose API key via BuildConfig — set in local.properties, not source control
+        buildConfigField(
+            "String",
+            "OPENROUTER_API_KEY",
+            "\"${localProps.getProperty("OPENROUTER_API_KEY", "")}\""
+        )
     }
 
     buildTypes {
@@ -38,6 +51,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true   // needed for BuildConfig.OPENROUTER_API_KEY
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
@@ -50,6 +64,7 @@ android {
 }
 
 dependencies {
+    // Core AndroidX
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
     implementation("androidx.activity:activity-compose:1.9.0")
@@ -58,10 +73,29 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    
+    implementation("androidx.compose.animation:animation")
+
+    // ViewModel + Lifecycle
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3")
+
+    // Hilt DI
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
 
+    // Hilt + Compose navigation
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // Room DB (Phase 2)
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+
+    // DataStore (Settings persistence)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // Unit tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:5.11.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")

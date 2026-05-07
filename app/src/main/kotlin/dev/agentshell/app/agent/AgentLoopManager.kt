@@ -2,6 +2,8 @@ package dev.agentshell.app.agent
 
 import dev.agentshell.app.llm.LLMEngine
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +26,8 @@ sealed class AgentResult {
     data class Failure(val reason: String) : AgentResult()
 }
 
-class AgentLoopManager(
+@Singleton
+class AgentLoopManager @Inject constructor(
     private val llmEngine: LLMEngine,
     private val toolDispatcher: ToolDispatcher
 ) {
