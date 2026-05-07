@@ -1,0 +1,37 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizard.settings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Kotlin
+/build
+*.gradle.kts
+!build.gradle.kts
+!settings.gradle.kts
+
+# Gradle
+.gradle/
+build/
+
+# Application
+app/build/
+
+# Log files
+*.log
+
+# Scripts (optional, but sometimes excluded if they contain sensitive info or are temporary)
+# accept_licenses.ps1
+# setup_build_env.ps1
+# init_project.ps1
