@@ -72,7 +72,7 @@ private fun MainScaffold(
                 NavRoute.SHELL    -> TerminalScreen()
                 NavRoute.CHAT     -> ChatScreen()
                 NavRoute.APPS     -> PlaceholderScreen("MINI APPS")
-                NavRoute.SETTINGS -> PlaceholderScreen("SETTINGS")
+                NavRoute.SETTINGS -> dev.agentshell.app.ui.settings.SettingsScreen()
             }
         }
     }

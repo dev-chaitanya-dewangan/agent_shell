@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -7,9 +10,9 @@ plugins {
 }
 
 // Read OPENROUTER_API_KEY from local.properties (never commit keys to git)
-val localProps = java.util.Properties().apply {
+val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
-    if (f.exists()) load(f.inputStream())
+    if (f.exists()) load(FileInputStream(f))
 }
 
 android {

@@ -14,7 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import dev.agentshell.app.ui.components.ShellInput
 import dev.agentshell.app.ui.components.ShellPanel
 import dev.agentshell.app.ui.components.Spacing
@@ -23,7 +23,7 @@ import dev.agentshell.app.ui.theme.AgentShellTypography
 
 @Composable
 fun TerminalScreen(
-    viewModel: TerminalViewModel = viewModel()
+    viewModel: TerminalViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val listState = rememberLazyListState()

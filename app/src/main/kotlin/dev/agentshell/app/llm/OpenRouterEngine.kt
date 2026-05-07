@@ -12,7 +12,10 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
-class OpenRouterEngine(private val apiKey: String) : LLMEngine {
+class OpenRouterEngine(
+    private val apiKey: String,
+    private val model: String = "google/gemini-flash-1.5-exp"
+) : LLMEngine {
 
     override val providerType = ProviderType.OPENROUTER
     override val isReady: Boolean = apiKey.isNotEmpty()
@@ -36,7 +39,7 @@ class OpenRouterEngine(private val apiKey: String) : LLMEngine {
             conn.doOutput = true
 
             val jsonBody = JSONObject().apply {
-                put("model", "minimax/minimax-m1:free")
+                put("model", model)
                 put("messages", JSONArray().apply {
                     put(JSONObject().apply {
                         put("role", "system")
