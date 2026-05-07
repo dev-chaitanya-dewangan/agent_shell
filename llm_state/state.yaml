@@ -1,14 +1,18 @@
 ---
 project_name: agentShell
-current_phase: Phase 1 (Core Foundation)
-current_step: Step 1 (Project Setup & Basic UI Framework)
+current_phase: Phase 1 (Core Foundation) — COMPLETE + Phase 2 started
+current_step: Step 5 (Memory & Persistence)
 status: In Progress
 
 goals:
-  - Setup basic Jetpack Compose scaffold and Navigation (Brutalist UI).
-  - Setup Terminal Session integration (pty4j + Terminal UI) to allow simple execution.
-  - Setup Local LLM interface (MediaPipe).
-  - Build the core loop: Prompt -> LLM -> Parse -> ToolDispatcher -> Run Command -> Terminal output.
+  - Wire ChatScreen to AgentLoopManager with full MVI pattern. [DONE]
+  - Implement Hilt DI across all ViewModels and singletons. [DONE]
+  - Add animated splash screen matching PRD Screen A. [DONE]
+  - Initialize Room DB for chat session + message persistence. [DONE]
+  - Document guidelines and current stage for future developers. [DONE]
+  - Wire chat session persistence into ChatViewModel.
+  - Build Settings screen (API key entry, provider selection).
+  - Implement hamburger sidebar with chat history list.
 
 completed_tasks:
   - Initialized Native Kotlin project with Gradle.
@@ -23,19 +27,38 @@ completed_tasks:
   - Build LLM Engine Interface and OpenRouter implementation.
   - Implement AgentLoopManager, ToolDispatcher, ResponseParser.
   - Added Programmatic Unit Tests for AgentLoopManager, ResponseParser, and Components.
+  - Implement Hilt DI via AppModule — all singletons provided.
+  - Build ChatScreen with live streaming tokens and agent status bar.
+  - Build ChatViewModel (MVI) wired to AgentLoopManager.
+  - Build SplashScreen with ASCII art typewriter animation (PRD Screen A).
+  - Add Room DB: AppDatabase, ChatSessionEntity/Dao, ChatMessageEntity/Dao.
+  - Update build.gradle.kts: Room, Hilt Nav Compose, ViewModel Compose, BuildConfig.
+  - Add @Singleton and @Inject constructor to AgentLoopManager for Hilt.
+  - Write GUIDELINES.md and CURRENT_STAGE.md in document/.
 
 pending_tasks:
-  - Connect AgentLoopManager to ChatScreen UI.
-  - Implement Hilt Dependency Injection across ViewModels.
+  - Wire ChatMessageDao into ChatViewModel for session persistence.
+  - Build Settings screen (DataStore for API key, provider choice).
+  - Build hamburger nav drawer with chat session history.
+  - Onboarding flow (7 screens).
+  - Foreground service (AgentShellService).
+  - Gemma local model integration (MediaPipe LlmInference).
+  - RAG memory (MiniLM + Room vector search).
 
 recent_changes:
-  - scaffolded basic android project.
-  - initialized Git tracking.
+  - feat: wire Hilt DI and implement ChatScreen with agent loop
+  - feat: add animated splash screen with ASCII art (PRD Screen A)
+  - feat: add Room DB for chat history persistence
+  - docs: add GUIDELINES.md and CURRENT_STAGE.md to document/
 
 architecture_notes:
   - Enforcing 0dp border radius everywhere (Brutalist constraint).
   - JetBrains Mono is the universal font.
-  - Adhering to Clean Architecture (UI -> Domain -> Data).
+  - Adhering to Clean Architecture (UI → Domain → Data).
   - Using Compose for all UI.
   - State tracking in `llm_state` directory for efficient context re-loading.
+  - All singletons provided by di/AppModule (Hilt SingletonComponent).
+  - ChatViewModel uses @HiltViewModel — injected by hiltViewModel() in ChatScreen.
+  - TerminalViewModel is still AndroidViewModel (tech debt — migrate later).
+  - API key stored in local.properties → exposed via BuildConfig.OPENROUTER_API_KEY.
 ---
