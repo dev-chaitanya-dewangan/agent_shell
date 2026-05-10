@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +28,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -124,6 +127,40 @@ fun ChatScreen(
                     color = AgentShellColors.TermSys,
                     style = AgentShellTypography.labelSmall
                 )
+            }
+        }
+
+        // Suggestion Chips
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.sm, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            val suggestions = listOf(
+                "Create a Calculator Mini-App",
+                "Create a Weather Mini-App",
+                "Create a To-Do List Mini-App",
+                "Run a full Termux system update",
+                "Clear the terminal screen"
+            )
+            items(suggestions) { suggestion ->
+                Box(
+                    modifier = Modifier
+                        .background(AgentShellColors.Shell1)
+                        .clickable {
+                            viewModel.onIntent(ChatIntent.InputChanged(suggestion))
+                            viewModel.onIntent(ChatIntent.SubmitTask)
+                        }
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = suggestion,
+                        color = AgentShellColors.Text1,
+                        style = AgentShellTypography.labelSmall
+                    )
+                }
             }
         }
 

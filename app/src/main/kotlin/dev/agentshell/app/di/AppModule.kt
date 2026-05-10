@@ -23,7 +23,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import dev.agentshell.app.data.settings.SettingsRepository
 import dev.agentshell.app.llm.DynamicLLMEngine
 import dev.agentshell.app.llm.LLMEngine
-import dev.agentshell.app.terminal.TerminalSession
 import java.io.File
 import javax.inject.Singleton
 
@@ -51,23 +50,13 @@ object AppModule {
     fun provideLLMEngine(settingsRepository: SettingsRepository): LLMEngine =
         DynamicLLMEngine(settingsRepository)
 
-    // ─── Terminal Layer ───────────────────────────────────────────────────────
-
-    @Provides
-    @Singleton
-    fun provideTerminalSession(@ApplicationContext context: Context): TerminalSession {
-        val workingDir = File(context.filesDir, "home").apply { mkdirs() }
-        return TerminalSession(workingDir)
-    }
-
     // ─── Agent Layer ──────────────────────────────────────────────────────────
 
     @Provides
     @Singleton
     fun provideToolDispatcher(
-        terminalSession: TerminalSession,
         termuxBridge: TermuxBridgeRepository
-    ): ToolDispatcher = ToolDispatcher(terminalSession, termuxBridge)
+    ): ToolDispatcher = ToolDispatcher(termuxBridge)
 
     @Provides
     @Singleton

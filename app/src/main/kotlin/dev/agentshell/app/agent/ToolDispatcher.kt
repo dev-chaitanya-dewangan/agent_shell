@@ -1,24 +1,18 @@
 package dev.agentshell.app.agent
 
 import dev.agentshell.app.accessibility.AgentAccessibilityService
-import dev.agentshell.app.terminal.TerminalSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.File
 import javax.inject.Inject
 
 class ToolDispatcher @Inject constructor(
-    private val terminalSession: TerminalSession,
     private val termuxBridge: TermuxBridgeRepository
 ) {
     fun dispatch(toolName: String, params: Map<String, String>): Flow<String> = flow {
         try {
             when (toolName) {
-                "run_shell" -> {
-                    val cmd = params["command"] ?: "echo 'No command provided'"
-                    terminalSession.executeCommand(cmd).collect { emit(it) }
-                }
-                "run_termux" -> {
+                "run_shell", "run_termux" -> {
                     val cmd = params["command"] ?: return@flow emit("[Error: No command]")
                     val result = termuxBridge.executeInTermux(cmd)
                     emit(result)

@@ -3,6 +3,7 @@ package dev.agentshell.app.terminal
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.agentshell.app.agent.TermuxBridgeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,38 +12,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TerminalState(
-    val outputLog: List<String> = emptyList(),
+    val outputLog: List<String> = listOf("Welcome to agentShell Terminal // Termux Background Bridge"),
     val currentInput: String = "",
     val isExecuting: Boolean = false
 )
 
 @HiltViewModel
 class TerminalViewModel @Inject constructor(
-    private val session: TerminalSession
+    private val termuxBridge: TermuxBridgeRepository
 ) : ViewModel() {
     
-    private val _state = MutableStateFlow(TerminalState(
-        outputLog = listOf("Welcome to agentShell Terminal (Stateful Backend)")
-    ))
+    private val _state = MutableStateFlow(TerminalState())
     val state: StateFlow<TerminalState> = _state.asStateFlow()
-
-    init {
-        // Collect continuous shell output
-        viewModelScope.launch {
-            session.outputFlow.collect { outputLine ->
-                if (!outputLine.contains("__END_CMD_")) {
-                    _state.update { currentState ->
-                        val newLog = currentState.outputLog.toMutableList()
-                        newLog.add(outputLine)
-                        if (newLog.size > 1000) {
-                            newLog.removeAt(0)
-                        }
-                        currentState.copy(outputLog = newLog)
-                    }
-                }
-            }
-        }
-    }
 
     fun onInputChanged(input: String) {
         _state.update { it.copy(currentInput = input) }
@@ -53,19 +34,33 @@ class TerminalViewModel @Inject constructor(
         if (command.isEmpty()) return
 
         _state.update { 
+            val newLog = it.outputLog.toMutableList().apply { 
+                add("> $command") 
+            }
             it.copy(
                 currentInput = "", 
-                isExecuting = true
+                isExecuting = true,
+                outputLog = newLog
             ) 
         }
 
         viewModelScope.launch {
-            // executeCommand handles writing to process and emitting to outputFlow internally
-            session.executeCommand(command).collect {
-                // Ignore collection here, because we already collect continuous output in init
-                // We just collect it to suspend until command finishes
+            val result = termuxBridge.executeInTermux(command)
+            
+            _state.update { currentState ->
+                val newLog = currentState.outputLog.toMutableList()
+                newLog.addAll(result.split("\n"))
+                
+                // Keep the log length manageable
+                if (newLog.size > 1000) {
+                    newLog.subList(0, newLog.size - 1000).clear()
+                }
+                
+                currentState.copy(
+                    isExecuting = false,
+                    outputLog = newLog
+                )
             }
-            _state.update { it.copy(isExecuting = false) }
         }
     }
     
