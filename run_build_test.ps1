@@ -67,6 +67,7 @@ function Main-Menu {
         Write-Host " [B] Build Debug APK"
         Write-Host " [T] Test (Install & Launch)"
         Write-Host " [A] All (Build + Test)"
+        Write-Host " [S] Start scrcpy (Screen Mirror)"
         Write-Host ""
         Write-Host " [C] Change Device"
         Write-Host " [Q] Quit"
@@ -104,6 +105,11 @@ function Main-Menu {
                 } else {
                     Write-Host "`n[!] Build Failed." -ForegroundColor Red
                 }
+                Read-Host "Press Enter to return..."
+            }
+            "s" {
+                Write-Host "`n[TASK] Starting scrcpy for $Device..." -ForegroundColor Blue
+                Start-Process "scrcpy" -ArgumentList "-s", $Device
                 Read-Host "Press Enter to return..."
             }
             "c" { return "change" }
