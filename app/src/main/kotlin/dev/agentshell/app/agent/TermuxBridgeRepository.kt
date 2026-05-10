@@ -32,7 +32,9 @@ class TermuxBridgeRepository @Inject constructor(
     }
 
     // Method B: Shared storage file bridge (reliable fallback, no Termux:API needed)
-    private val bridgeDir = File("/sdcard/agentshell/bridge").apply { mkdirs() }
+    // Uses app-specific external dir — accessible to both app and Termux without special permissions
+    private val bridgeDir: File
+        get() = File(context.getExternalFilesDir(null), "bridge").apply { mkdirs() }
 
     suspend fun executeInTermux(command: String, timeoutMs: Long = 30_000): String {
         if (!bridgeDir.exists()) bridgeDir.mkdirs()
