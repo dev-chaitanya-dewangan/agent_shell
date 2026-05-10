@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
-BRIDGE_DIR="/sdcard/Android/data/dev.agentshell.app/files/bridge"
+BRIDGE_DIR="/sdcard/Download/agentshell/bridge"
 mkdir -p "$BRIDGE_DIR"
 echo "[AgentShell Bridge] Watcher started at $BRIDGE_DIR"
 while true; do
