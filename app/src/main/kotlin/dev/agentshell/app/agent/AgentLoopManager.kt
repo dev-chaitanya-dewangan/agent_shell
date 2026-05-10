@@ -19,7 +19,7 @@ sealed class AgentState {
     data class Planning(val task: String) : AgentState()
     data class Thinking(val step: Int, val maxSteps: Int) : AgentState()
     data class Streaming(val partial: String) : AgentState()
-    data class Acting(val tool: String, val step: Int) : AgentState()
+    data class Acting(val tool: String, val params: Map<String, String>, val step: Int) : AgentState()
     object Reflecting : AgentState()
 }
 
@@ -55,18 +55,31 @@ class AgentLoopManager @Inject constructor(
 
         val systemPrompt = hermesContextBuilder.buildSystemPrompt() + """
             
-            You have access to the following tools:
-            run_shell, run_termux, write_file, read_file, list_dir, ui_tap, ui_type, ui_find_and_tap, ui_get_screen, open_app, create_mini_app, take_screenshot.
+            You have access to the following tools. Call them using JSON format only.
             
-            You can use tools by returning JSON format:
-            {"tool": "run_shell", "params": {"command": "ls -la"}}
-            OR XML format:
-            <tool_call>
-              <name>run_shell</name>
-              <command>ls -la</command>
-            </tool_call>
+            TOOL SCHEMAS:
+            {"tool": "run_shell",      "params": {"command": "<bash command>"}}
+            {"tool": "run_termux",     "params": {"command": "<bash command>"}}
+            {"tool": "write_file",     "params": {"path": "<abs path>", "content": "<text>"}}
+            {"tool": "read_file",      "params": {"path": "<abs path>"}}
+            {"tool": "list_dir",       "params": {"path": "<abs path>"}}
+            {"tool": "ui_tap",         "params": {"x": "100", "y": "200"}}
+            {"tool": "ui_type",        "params": {"text": "<text to type>"}}
+            {"tool": "ui_find_and_tap","params": {"text": "<button label>"}}
+            {"tool": "ui_get_screen",  "params": {}}
+            {"tool": "open_app",       "params": {"package": "<package name>"}}
+            {"tool": "take_screenshot","params": {}}
+            {"tool": "create_mini_app","params": {
+                "name": "<display name>",
+                "description": "<one line description>",
+                "html": "<full self-contained HTML string for the mini-app>"
+            }}
             
-            When finished, reply without JSON/XML blocks to return to user.
+            IMPORTANT: create_mini_app saves the app to the APPS tab permanently.
+            Always provide a complete, self-contained HTML with inline CSS and JS.
+            
+            When finished with all steps and no more tool calls are needed,
+            respond with plain text (no JSON/XML) to complete the task.
         """.trimIndent()
 
         _agentState.value = AgentState.Planning(task)
@@ -102,7 +115,7 @@ class AgentLoopManager @Inject constructor(
             }
 
             val toolCall = parsed.toolCall
-            _agentState.value = AgentState.Acting(toolCall.name, stepCount)
+            _agentState.value = AgentState.Acting(toolCall.name, toolCall.params, stepCount)
             brainLogger.log(LogType.TOOL_CALL, toolCall.name, toolCall.params.toString())
             
             val toolOutput = StringBuilder()

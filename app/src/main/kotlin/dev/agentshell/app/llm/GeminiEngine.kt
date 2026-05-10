@@ -12,6 +12,21 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
+/**
+ * Gemini REST engine.
+ *
+ * Free-tier stable models (as of 2025):
+ *   gemini-2.0-flash          — fast, free quota, recommended default
+ *   gemini-2.0-flash-lite     — lightest / fastest
+ *   gemini-1.5-flash          — stable, generous free quota
+ *   gemini-1.5-flash-8b       — small 8B variant
+ *   gemini-1.5-pro            — highest quality, limited free quota
+ *
+ * Preview / experimental (may be removed without notice — avoid for prod):
+ *   gemini-2.5-flash-preview-04-17
+ *   gemini-2.5-pro-preview-05-06
+ */
+
 class GeminiEngine(
     private val apiKey: String,
     private val model: String
@@ -70,29 +85,35 @@ class GeminiEngine(
                 BufferedReader(InputStreamReader(conn.errorStream))
             }
 
-            reader.use { buf ->
-                var line: String?
-                // The Gemini streamGenerateContent API returns a JSON array of response chunks.
-                // We parse it as a sequence of objects since the format is typically:
-                // [
-                //   {...},
-                //   {...}
-                // ]
-                // It sends chunks progressively. We can use a simple parser or just accumulate and parse.
-                // Since HttpURLConnection might buffer, let's just parse JSON manually if we can,
-                // or read lines. Gemini's stream often puts "text": "..." inside parts.
-                
-                // For simplicity in a mock-like direct HTTP implementation, we can just look for "text": "..."
-                while (buf.readLine().also { line = it } != null) {
-                    val l = line!!.trim()
-                    if (l.startsWith("\"text\": \"")) {
-                        // Extract text using simple substring
-                        val textPart = l.substringAfter("\"text\": \"").substringBeforeLast("\"")
-                        // Unescape newlines and quotes
-                        val unescaped = textPart.replace("\\n", "\n").replace("\\\"", "\"").replace("\\\\", "\\")
-                        emit(unescaped)
+            // Accumulate full body then parse — HttpURLConnection buffers anyway
+            val body = reader.use { it.readText() }
+
+            if (conn.responseCode !in 200..299) {
+                emit("[LLM Error ${conn.responseCode}]: $body")
+                return@flow
+            }
+
+            // Gemini streamGenerateContent returns a JSON array:
+            // [{"candidates":[{"content":{"parts":[{"text":"..."}]}}]}, ...]
+            // We accumulate and emit each text chunk in order.
+            try {
+                val chunks = JSONArray(body)
+                for (i in 0 until chunks.length()) {
+                    val chunk = chunks.optJSONObject(i) ?: continue
+                    val candidates = chunk.optJSONArray("candidates") ?: continue
+                    for (ci in 0 until candidates.length()) {
+                        val content = candidates.optJSONObject(ci)
+                            ?.optJSONObject("content") ?: continue
+                        val parts = content.optJSONArray("parts") ?: continue
+                        for (pi in 0 until parts.length()) {
+                            val text = parts.optJSONObject(pi)?.optString("text") ?: continue
+                            if (text.isNotEmpty()) emit(text)
+                        }
                     }
                 }
+            } catch (jsonEx: Exception) {
+                // Fallback: raw body so user sees something useful
+                emit("[Parse Error: ${jsonEx.message}] Raw: ${body.take(300)}")
             }
         } catch (e: Exception) {
             emit("[LLM Error: ${e.message}]")

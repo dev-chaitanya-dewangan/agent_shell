@@ -4,14 +4,18 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.agentshell.app.ui.theme.AgentShellColors
+import dev.agentshell.app.ui.theme.AgentShellTypography
 import dev.agentshell.app.ui.components.ShellPanel
 import java.io.File
 
@@ -21,12 +25,9 @@ fun MiniAppDetailScreen(
     viewModel: MiniAppsViewModel = hiltViewModel()
 ) {
     val miniApp = remember { mutableStateOf<MiniAppEntity?>(null) }
-    val dao = (viewModel as? MiniAppsViewModel)?.javaClass?.getDeclaredField("dao")?.apply { isAccessible = true }?.get(viewModel) as? MiniAppDao
 
     LaunchedEffect(appId) {
-        dao?.getById(appId)?.let { app ->
-            miniApp.value = app
-        }
+        miniApp.value = viewModel.getById(appId)
     }
 
     Column(
@@ -35,11 +36,20 @@ fun MiniAppDetailScreen(
             .background(AgentShellColors.TermBg)
     ) {
         ShellPanel(
-            header = "MINI APP // ${miniApp.value?.name ?: "LOADING"}",
+            header = "MINI APP // ${miniApp.value?.name ?: "LOADING..."}",
             modifier = Modifier.fillMaxSize()
         ) {
             val app = miniApp.value
-            if (app != null) {
+            if (app == null) {
+                // Still loading — show nothing or a spinner
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "Loading...",
+                        color = AgentShellColors.Text3,
+                        style = AgentShellTypography.bodyLarge
+                    )
+                }
+            } else {
                 val file = File(app.entryHtmlPath)
                 if (file.exists()) {
                     AndroidView(
@@ -54,8 +64,31 @@ fun MiniAppDetailScreen(
                         },
                         modifier = Modifier.fillMaxSize()
                     )
+                } else {
+                    // HTML file missing — show error with path
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "[ERROR] HTML file not found",
+                                color = AgentShellColors.Error,
+                                style = AgentShellTypography.bodyLarge
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = app.entryHtmlPath,
+                                color = AgentShellColors.Text3,
+                                style = AgentShellTypography.bodySmall
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
+

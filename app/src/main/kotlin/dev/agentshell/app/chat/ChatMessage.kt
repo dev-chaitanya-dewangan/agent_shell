@@ -44,6 +44,8 @@ data class ChatState(
 /** MVI Intents — all user actions on the Chat screen. */
 sealed class ChatIntent {
     data class InputChanged(val text: String) : ChatIntent()
-    object SubmitTask : ChatIntent()
-    object ClearChat : ChatIntent()
+    object SubmitTask   : ChatIntent()
+    object ClearChat    : ChatIntent()
+    /** Start a brand-new chat session, clearing all messages. */
+    object NewSession   : ChatIntent()
 }

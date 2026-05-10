@@ -52,7 +52,8 @@ class ChatViewModel @Inject constructor(
         when (intent) {
             is ChatIntent.InputChanged -> _state.update { it.copy(currentInput = intent.text) }
             is ChatIntent.SubmitTask   -> submitTask()
-            is ChatIntent.ClearChat   -> _state.update { ChatState() }
+            is ChatIntent.ClearChat    -> _state.update { ChatState() }
+            is ChatIntent.NewSession   -> _state.update { ChatState() } // TODO: persist previous session to Room, create new session ID
         }
     }
 

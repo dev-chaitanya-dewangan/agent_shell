@@ -55,8 +55,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideToolDispatcher(
-        termuxBridge: TermuxBridgeRepository
-    ): ToolDispatcher = ToolDispatcher(termuxBridge)
+        termuxBridge: TermuxBridgeRepository,
+        miniAppDao: MiniAppDao,
+        @ApplicationContext context: Context
+    ): ToolDispatcher = ToolDispatcher(termuxBridge, miniAppDao, context)
 
     @Provides
     @Singleton

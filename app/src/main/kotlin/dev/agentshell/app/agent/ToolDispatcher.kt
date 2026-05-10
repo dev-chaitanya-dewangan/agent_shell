@@ -1,13 +1,20 @@
 package dev.agentshell.app.agent
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.agentshell.app.accessibility.AgentAccessibilityService
+import dev.agentshell.app.miniapp.MiniAppDao
+import dev.agentshell.app.miniapp.MiniAppEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.File
+import java.util.UUID
 import javax.inject.Inject
 
 class ToolDispatcher @Inject constructor(
-    private val termuxBridge: TermuxBridgeRepository
+    private val termuxBridge: TermuxBridgeRepository,
+    private val miniAppDao: MiniAppDao,
+    @ApplicationContext private val context: Context
 ) {
     fun dispatch(toolName: String, params: Map<String, String>): Flow<String> = flow {
         try {
@@ -20,7 +27,9 @@ class ToolDispatcher @Inject constructor(
                 "write_file" -> {
                     val path = params["path"] ?: return@flow emit("[Error: No path]")
                     val content = params["content"] ?: ""
-                    File(path).writeText(content)
+                    val file = File(path)
+                    file.parentFile?.mkdirs()
+                    file.writeText(content)
                     emit("[File written: $path]")
                 }
                 "read_file" -> {
@@ -66,8 +75,37 @@ class ToolDispatcher @Inject constructor(
                     emit("[App opened]")
                 }
                 "create_mini_app" -> {
-                    // TODO: Database insertion
-                    emit("[Mini app created]")
+                    val name = params["name"] ?: params["title"] ?: "Unnamed App"
+                    val description = params["description"] ?: params["desc"] ?: ""
+                    val htmlContent = params["html"] ?: params["content"] ?: ""
+
+                    // Write HTML to app-private files directory so WebView can load it
+                    val appId = UUID.randomUUID().toString()
+                    val miniAppsDir = File(context.filesDir, "mini_apps/$appId")
+                    miniAppsDir.mkdirs()
+                    val htmlFile = File(miniAppsDir, "index.html")
+                    if (htmlContent.isNotBlank()) {
+                        htmlFile.writeText(htmlContent)
+                    } else {
+                        // Generate a minimal placeholder so the app is openable
+                        htmlFile.writeText(
+                            """<!DOCTYPE html><html><head><meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width,initial-scale=1">
+                            <title>$name</title>
+                            <style>body{background:#0d0d0d;color:#e0e0e0;font-family:monospace;padding:20px}</style>
+                            </head><body><h1>$name</h1><p>$description</p></body></html>"""
+                        )
+                    }
+
+                    val entity = MiniAppEntity(
+                        id = appId,
+                        name = name,
+                        description = description,
+                        entryHtmlPath = htmlFile.absolutePath,
+                        timestamp = System.currentTimeMillis()
+                    )
+                    miniAppDao.insert(entity)
+                    emit("[Mini app created: $name (id=$appId, path=${htmlFile.absolutePath})]")
                 }
                 "take_screenshot" -> {
                     emit("[Screenshot taken]")

@@ -23,8 +23,8 @@ class SettingsRepository @Inject constructor(
         val KEY_OPENROUTER_CUSTOM_MODELS = stringPreferencesKey("openrouter_custom_models")
         val KEY_GEMINI_CUSTOM_MODELS = stringPreferencesKey("gemini_custom_models")
         
-        const val DEFAULT_GEMINI_MODEL = "gemini-1.5-flash-preview-0514"
-        const val DEFAULT_OPENROUTER_MODEL = "google/gemini-flash-1.5-exp"
+        const val DEFAULT_GEMINI_MODEL = "gemini-2.0-flash"
+        const val DEFAULT_OPENROUTER_MODEL = "google/gemini-2.0-flash-exp:free"
     }
 
     val providerTypeFlow: Flow<ProviderType> = dataStore.data.map { prefs ->
