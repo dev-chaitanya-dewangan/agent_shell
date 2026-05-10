@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import dev.agentshell.app.chat.ChatScreen
 import dev.agentshell.app.terminal.TerminalScreen
+import dev.agentshell.app.miniapp.MiniAppsScreen
+import dev.agentshell.app.miniapp.MiniAppDetailScreen
 import dev.agentshell.app.ui.splash.SplashScreen
 import dev.agentshell.app.ui.theme.AgentShellColors
 import dev.agentshell.app.ui.theme.AgentShellTypography
@@ -71,10 +73,20 @@ private fun MainScaffold(
             when (currentRoute) {
                 NavRoute.SHELL    -> TerminalScreen()
                 NavRoute.CHAT     -> ChatScreen()
-                NavRoute.APPS     -> PlaceholderScreen("MINI APPS")
+                NavRoute.APPS     -> MiniAppsFlow()
                 NavRoute.SETTINGS -> dev.agentshell.app.ui.settings.SettingsScreen()
             }
         }
+    }
+}
+
+@Composable
+fun MiniAppsFlow() {
+    var selectedAppId by remember { mutableStateOf<String?>(null) }
+    if (selectedAppId == null) {
+        MiniAppsScreen(onAppClick = { selectedAppId = it })
+    } else {
+        MiniAppDetailScreen(appId = selectedAppId!!)
     }
 }
 

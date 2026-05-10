@@ -9,10 +9,15 @@ import dagger.hilt.components.SingletonComponent
 import dev.agentshell.app.BuildConfig
 import dev.agentshell.app.agent.AgentLoopManager
 import dev.agentshell.app.agent.ToolDispatcher
+import dev.agentshell.app.agent.TermuxBridgeRepository
+import dev.agentshell.app.brain.BrainLogger
+import dev.agentshell.app.brain.HermesContextBuilder
 import dev.agentshell.app.data.db.AppDatabase
 import androidx.datastore.core.DataStore
 import dev.agentshell.app.data.db.ChatMessageDao
 import dev.agentshell.app.data.db.ChatSessionDao
+import dev.agentshell.app.brain.BrainLogDao
+import dev.agentshell.app.miniapp.MiniAppDao
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import dev.agentshell.app.data.settings.SettingsRepository
@@ -59,15 +64,19 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideToolDispatcher(terminalSession: TerminalSession): ToolDispatcher =
-        ToolDispatcher(terminalSession)
+    fun provideToolDispatcher(
+        terminalSession: TerminalSession,
+        termuxBridge: TermuxBridgeRepository
+    ): ToolDispatcher = ToolDispatcher(terminalSession, termuxBridge)
 
     @Provides
     @Singleton
     fun provideAgentLoopManager(
         llmEngine: LLMEngine,
-        toolDispatcher: ToolDispatcher
-    ): AgentLoopManager = AgentLoopManager(llmEngine, toolDispatcher)
+        toolDispatcher: ToolDispatcher,
+        hermesContextBuilder: HermesContextBuilder,
+        brainLogger: BrainLogger
+    ): AgentLoopManager = AgentLoopManager(llmEngine, toolDispatcher, hermesContextBuilder, brainLogger)
 
     // ─── Database Layer ───────────────────────────────────────────────────────
 
@@ -83,4 +92,12 @@ object AppModule {
     @Provides
     @Singleton
     fun provideChatMessageDao(db: AppDatabase): ChatMessageDao = db.chatMessageDao()
+
+    @Provides
+    @Singleton
+    fun provideBrainLogDao(db: AppDatabase): BrainLogDao = db.brainLogDao()
+
+    @Provides
+    @Singleton
+    fun provideMiniAppDao(db: AppDatabase): MiniAppDao = db.miniAppDao()
 }

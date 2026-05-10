@@ -18,6 +18,7 @@ import dev.agentshell.app.ui.nav.AppNavGraph
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             AgentShellTheme {
                 AppNavGraph()

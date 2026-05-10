@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -39,6 +40,7 @@ fun TerminalScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AgentShellColors.TermBg)
+            .imePadding()
     ) {
         ShellPanel(
             header = "TERMINAL // LOCAL",

@@ -1,5 +1,8 @@
 package dev.agentshell.app.agent
 
+import dev.agentshell.app.brain.BrainLogger
+import dev.agentshell.app.brain.HermesContextBuilder
+import dev.agentshell.app.brain.LogType
 import dev.agentshell.app.llm.LLMEngine
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
@@ -29,14 +32,16 @@ sealed class AgentResult {
 @Singleton
 class AgentLoopManager @Inject constructor(
     private val llmEngine: LLMEngine,
-    private val toolDispatcher: ToolDispatcher
+    private val toolDispatcher: ToolDispatcher,
+    private val hermesContextBuilder: HermesContextBuilder,
+    private val brainLogger: BrainLogger
 ) {
     private val loopMutex = Mutex()
     
     private val _agentState = MutableStateFlow<AgentState>(AgentState.Idle)
     val agentState: StateFlow<AgentState> = _agentState.asStateFlow()
 
-    suspend fun run(task: String, maxSteps: Int = 4): AgentResult {
+    suspend fun run(task: String, maxSteps: Int = 12): AgentResult {
         return loopMutex.withLock {
             runLoop(task, maxSteps)
         }
@@ -46,21 +51,22 @@ class AgentLoopManager @Inject constructor(
         var stepCount = 0
         var contextHistory = "Task: $task\n\n"
 
-        val systemPrompt = """
-            You are agentShell, a local on-device AI agent.
-            You can use tools by returning XML format:
+        brainLogger.log(LogType.TASK_START, "NEW TASK", task)
+
+        val systemPrompt = hermesContextBuilder.buildSystemPrompt() + """
+            
+            You have access to the following tools:
+            run_shell, run_termux, write_file, read_file, list_dir, ui_tap, ui_type, ui_find_and_tap, ui_get_screen, open_app, create_mini_app, take_screenshot.
+            
+            You can use tools by returning JSON format:
+            {"tool": "run_shell", "params": {"command": "ls -la"}}
+            OR XML format:
             <tool_call>
               <name>run_shell</name>
               <command>ls -la</command>
             </tool_call>
-            OR
-            <tool_call>
-              <name>write_file</name>
-              <path>test.txt</path>
-              <content>hello</content>
-            </tool_call>
             
-            When finished, reply without XML blocks to return to user.
+            When finished, reply without JSON/XML blocks to return to user.
         """.trimIndent()
 
         _agentState.value = AgentState.Planning(task)
@@ -87,6 +93,7 @@ class AgentLoopManager @Inject constructor(
             val parsed = ResponseParser.parse(llmResponse.toString())
 
             contextHistory += "Agent:\n$llmResponse\n\n"
+            brainLogger.log(LogType.AGENT_THOUGHT, "STEP $stepCount", llmResponse.toString())
 
             if (parsed.isDone || parsed.toolCall == null) {
                 _agentState.value = AgentState.Reflecting
@@ -96,6 +103,7 @@ class AgentLoopManager @Inject constructor(
 
             val toolCall = parsed.toolCall
             _agentState.value = AgentState.Acting(toolCall.name, stepCount)
+            brainLogger.log(LogType.TOOL_CALL, toolCall.name, toolCall.params.toString())
             
             val toolOutput = StringBuilder()
             try {
@@ -103,10 +111,13 @@ class AgentLoopManager @Inject constructor(
                     toolOutput.append(output).append("\n")
                 }
             } catch (e: Exception) {
-                toolOutput.append("[Tool Execution Error: ${e.message}]\n")
+                val err = "[Tool Execution Error: ${e.message}]\n"
+                toolOutput.append(err)
+                brainLogger.log(LogType.ERROR, "TOOL_ERROR", err)
             }
 
             contextHistory += "Tool Output:\n$toolOutput\n\n"
+            brainLogger.log(LogType.TOOL_RESULT, toolCall.name, toolOutput.toString())
         }
 
         _agentState.value = AgentState.Reflecting

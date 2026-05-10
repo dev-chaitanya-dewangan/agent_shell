@@ -24,7 +24,7 @@ function Select-Device {
         Write-Host "   AgentShell: DEVICE SELECTION           " -ForegroundColor Yellow
         Write-Host "==========================================" -ForegroundColor Yellow
         
-        $devices = Get-AdbDevices
+        $devices = @(Get-AdbDevices)
         
         if ($devices.Count -eq 0) {
             Write-Host " [!] No devices detected via ADB." -ForegroundColor Red
@@ -48,8 +48,9 @@ function Select-Device {
         if ($choice -eq "q") { exit }
         if ($choice -eq "r") { continue }
         
-        if ($choice -as [int] -and $choice -ge 1 -and $choice -le $devices.Count) {
-            return $devices[$choice - 1]
+        $choiceInt = $choice -as [int]
+        if ($null -ne $choiceInt -and $choiceInt -ge 1 -and $choiceInt -le $devices.Count) {
+            return $devices[$choiceInt - 1]
         }
     }
 }

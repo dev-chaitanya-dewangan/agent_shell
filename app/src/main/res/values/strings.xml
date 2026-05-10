@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_description">AgentShell requires Accessibility Service to automate UI actions (tap, type, read screen) when executing agent tasks.</string>
+</resources>
