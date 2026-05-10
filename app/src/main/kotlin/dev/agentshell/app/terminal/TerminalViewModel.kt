@@ -30,13 +30,15 @@ class TerminalViewModel @Inject constructor(
         // Collect continuous shell output
         viewModelScope.launch {
             session.outputFlow.collect { outputLine ->
-                _state.update { currentState ->
-                    val newLog = currentState.outputLog.toMutableList()
-                    newLog.add(outputLine)
-                    if (newLog.size > 1000) {
-                        newLog.removeAt(0)
+                if (!outputLine.contains("__END_CMD_")) {
+                    _state.update { currentState ->
+                        val newLog = currentState.outputLog.toMutableList()
+                        newLog.add(outputLine)
+                        if (newLog.size > 1000) {
+                            newLog.removeAt(0)
+                        }
+                        currentState.copy(outputLog = newLog)
                     }
-                    currentState.copy(outputLog = newLog)
                 }
             }
         }
