@@ -32,9 +32,11 @@ class TermuxBridgeRepository @Inject constructor(
     }
 
     // Method B: Shared storage file bridge — /sdcard/Download accessible to both app and Termux
+    // ⚠️  THIS PATH MUST MATCH bridge_watcher.sh BRIDGE_DIR variable exactly!
     private val bridgeDir: File
         get() = File("/sdcard/Download/agentshell/bridge").apply { mkdirs() }
 
+    // Default timeout is 30s. Callers like the terminal may pass shorter values for fast commands.
     suspend fun executeInTermux(command: String, timeoutMs: Long = 30_000): String {
         if (!bridgeDir.exists()) bridgeDir.mkdirs()
         
@@ -78,6 +80,7 @@ class TermuxBridgeRepository @Inject constructor(
                     }
                 }
             }
-        } ?: "[Termux bridge timeout ${timeoutMs}ms — is the watcher running?]"
+        } ?: "[Termux bridge timeout after ${timeoutMs}ms]\n" +
+               "[FIX] Run this in Termux: bash /sdcard/Download/agentshell/bridge/bridge_watcher.sh]"
     }
 }

@@ -47,6 +47,9 @@ Phase 3 (Polish)           ░░░░░░░░░░░░░░░░░�
 | Brain logger | `brain/BrainLogger.kt`, `BrainLogDao.kt`, `BrainLogEntity.kt` | ✅ Done |
 | Hermes context builder | `brain/HermesContextBuilder.kt` | ✅ Done |
 | Accessibility service | `accessibility/AgentAccessibilityService.kt` | ✅ Done |
+| Voice input wrapper | `voice/VoiceInputManager.kt` | ✅ Done |
+| Voice agent UI (overlay & VM) | `ui/components/VoiceOverlayUI.kt`, `VoiceAgentViewModel.kt` | ✅ Done |
+| AppsHub redesign (grids) | `ui/apps/AppsHubScreen.kt`, `AppNavGraph.kt` | ✅ Done |
 
 ---
 

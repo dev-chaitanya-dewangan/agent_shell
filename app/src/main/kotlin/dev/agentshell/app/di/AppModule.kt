@@ -23,6 +23,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import dev.agentshell.app.data.settings.SettingsRepository
 import dev.agentshell.app.llm.DynamicLLMEngine
 import dev.agentshell.app.llm.LLMEngine
+import dev.agentshell.app.voice.TextToSpeechManager
+import dev.agentshell.app.voice.VoiceInputManager
 import java.io.File
 import javax.inject.Singleton
 
@@ -91,4 +93,16 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMiniAppDao(db: AppDatabase): MiniAppDao = db.miniAppDao()
+
+    // ─── Voice Layer ──────────────────────────────────────────────────────────
+
+    @Provides
+    @Singleton
+    fun provideVoiceInputManager(@ApplicationContext context: Context): VoiceInputManager =
+        VoiceInputManager(context)
+
+    @Provides
+    @Singleton
+    fun provideTextToSpeechManager(@ApplicationContext context: Context): TextToSpeechManager =
+        TextToSpeechManager(context).also { it.initialize() }
 }

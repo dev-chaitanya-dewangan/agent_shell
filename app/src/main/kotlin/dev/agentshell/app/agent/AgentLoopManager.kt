@@ -56,30 +56,45 @@ class AgentLoopManager @Inject constructor(
         val systemPrompt = hermesContextBuilder.buildSystemPrompt() + """
             
             You have access to the following tools. Call them using JSON format only.
-            
+
             TOOL SCHEMAS:
-            {"tool": "run_shell",      "params": {"command": "<bash command>"}}
-            {"tool": "run_termux",     "params": {"command": "<bash command>"}}
-            {"tool": "write_file",     "params": {"path": "<abs path>", "content": "<text>"}}
-            {"tool": "read_file",      "params": {"path": "<abs path>"}}
-            {"tool": "list_dir",       "params": {"path": "<abs path>"}}
-            {"tool": "ui_tap",         "params": {"x": "100", "y": "200"}}
-            {"tool": "ui_type",        "params": {"text": "<text to type>"}}
-            {"tool": "ui_find_and_tap","params": {"text": "<button label>"}}
-            {"tool": "ui_get_screen",  "params": {}}
-            {"tool": "open_app",       "params": {"package": "<package name>"}}
-            {"tool": "take_screenshot","params": {}}
-            {"tool": "create_mini_app","params": {
+            {"tool": "run_shell",          "params": {"command": "<bash command>"}}
+            {"tool": "run_termux",         "params": {"command": "<bash command>"}}
+            {"tool": "write_file",         "params": {"path": "<abs path>", "content": "<text>"}}
+            {"tool": "read_file",          "params": {"path": "<abs path>"}}
+            {"tool": "list_dir",           "params": {"path": "<abs path>"}}
+            {"tool": "ui_tap",             "params": {"x": "100", "y": "200"}}
+            {"tool": "ui_type",            "params": {"text": "<text to type>"}}
+            {"tool": "ui_find_and_tap",    "params": {"text": "<visible button or element label>"}}
+            {"tool": "ui_get_screen",      "params": {}}
+            {"tool": "ui_scroll",          "params": {"direction": "down"}}
+            {"tool": "open_app",           "params": {"package": "<android package name>"}}
+            {"tool": "wait_ms",            "params": {"ms": "1500"}}
+            {"tool": "read_screen_text",   "params": {}}
+            {"tool": "speak",              "params": {"text": "<text to say aloud to the user>"}}
+            {"tool": "take_screenshot",    "params": {}}
+            {"tool": "whatsapp_message",   "params": {"contact": "<contact name>", "message": "<message text>"}}
+            {"tool": "create_mini_app",    "params": {
                 "name": "<display name>",
                 "description": "<one line description>",
                 "html": "<full self-contained HTML string for the mini-app>"
             }}
-            
-            IMPORTANT: create_mini_app saves the app to the APPS tab permanently.
-            Always provide a complete, self-contained HTML with inline CSS and JS.
-            
+
+            TOOL USAGE RULES:
+            - Use open_app to launch apps. Common packages:
+              WhatsApp="com.whatsapp", Chrome="com.android.chrome",
+              YouTube="com.google.android.youtube", Photos="com.google.android.apps.photos",
+              Spotify="com.spotify.music", Gmail="com.google.android.gm",
+              Ola="com.olacabs.customer", Uber="com.ubercabs.rider"
+            - ALWAYS call wait_ms(1500) immediately after open_app to let the app load
+            - Use whatsapp_message for any "send message on WhatsApp" task — it handles the full chain
+            - Use read_screen_text to extract all visible text for summarization or searching
+            - Use speak to read results aloud to the user after completing a task
+            - Use ui_find_and_tap for labeled buttons; use ui_tap(x,y) only when no label exists
+            - create_mini_app saves the app to the APPS tab permanently — provide full self-contained HTML
+
             When finished with all steps and no more tool calls are needed,
-            respond with plain text (no JSON/XML) to complete the task.
+            respond with plain text (no JSON) to complete the task.
         """.trimIndent()
 
         _agentState.value = AgentState.Planning(task)

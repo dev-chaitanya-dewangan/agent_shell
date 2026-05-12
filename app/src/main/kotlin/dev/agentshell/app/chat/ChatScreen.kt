@@ -13,6 +13,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,12 +26,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +46,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -187,14 +192,46 @@ fun ChatScreen(
                 }
             }
 
-            // Input bar
-            ShellInput(
-                value = state.currentInput,
-                onValueChange = { viewModel.onIntent(ChatIntent.InputChanged(it)) },
-                placeholder = if (state.isAgentRunning) "Agent running..." else "Enter task for agent...",
-                onSubmit = { viewModel.onIntent(ChatIntent.SubmitTask) },
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Input bar + Mic Button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AgentShellColors.Shell0)
+                    .padding(end = Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ShellInput(
+                    value = if (state.isListening && state.liveVoiceText.isNotEmpty()) state.liveVoiceText else state.currentInput,
+                    onValueChange = { viewModel.onIntent(ChatIntent.InputChanged(it)) },
+                    placeholder = if (state.isListening) "Listening..." else if (state.isAgentRunning) "Agent running..." else "Enter task or hold mic...",
+                    onSubmit = { viewModel.onIntent(ChatIntent.SubmitTask) },
+                    modifier = Modifier.weight(1f)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(start = 8.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (state.isListening) AgentShellColors.Amber else AgentShellColors.Shell2)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    viewModel.onIntent(ChatIntent.StartVoiceInput)
+                                    tryAwaitRelease()
+                                    viewModel.onIntent(ChatIntent.StopVoiceInput)
+                                }
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "🎤",
+                        color = if (state.isListening) AgentShellColors.TermBg else AgentShellColors.Text1,
+                        style = AgentShellTypography.titleMedium
+                    )
+                }
+            }
         }
 
         // ─── Drawer scrim (tap-outside to close) ─────────────────────────────

@@ -33,19 +33,27 @@ data class ChatState(
     val messages: List<ChatMessage> = listOf(
         ChatMessage(
             role = MessageRole.SYSTEM,
-            content = "[agentShell] Ready. Type a task for your agent."
+            content = "[agentShell] Ready. Type a task or tap the mic."
         )
     ),
     val currentInput: String = "",
     val isAgentRunning: Boolean = false,
-    val streamingToken: String = ""
+    val streamingToken: String = "",
+    /** True while SpeechRecognizer is actively listening. */
+    val isListening: Boolean = false,
+    /** Partial speech recognition text shown live while user speaks. */
+    val liveVoiceText: String = ""
 )
 
 /** MVI Intents — all user actions on the Chat screen. */
 sealed class ChatIntent {
     data class InputChanged(val text: String) : ChatIntent()
-    object SubmitTask   : ChatIntent()
-    object ClearChat    : ChatIntent()
+    object SubmitTask       : ChatIntent()
+    object ClearChat        : ChatIntent()
     /** Start a brand-new chat session, clearing all messages. */
-    object NewSession   : ChatIntent()
+    object NewSession       : ChatIntent()
+    /** User pressed and held the mic button — start listening. */
+    object StartVoiceInput  : ChatIntent()
+    /** User released the mic button — stop listening and submit. */
+    object StopVoiceInput   : ChatIntent()
 }

@@ -3,6 +3,7 @@ package dev.agentshell.app.miniapp
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import java.io.File
 @Composable
 fun MiniAppDetailScreen(
     appId: String,
+    onBack: () -> Unit,
     viewModel: MiniAppsViewModel = hiltViewModel()
 ) {
     val miniApp = remember { mutableStateOf<MiniAppEntity?>(null) }
@@ -39,6 +41,19 @@ fun MiniAppDetailScreen(
             header = "MINI APP // ${miniApp.value?.name ?: "LOADING..."}",
             modifier = Modifier.fillMaxSize()
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AgentShellColors.Shell1)
+                    .clickable { onBack() }
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = "<- BACK",
+                    color = AgentShellColors.Amber,
+                    style = AgentShellTypography.labelSmall
+                )
+            }
             val app = miniApp.value
             if (app == null) {
                 // Still loading — show nothing or a spinner
