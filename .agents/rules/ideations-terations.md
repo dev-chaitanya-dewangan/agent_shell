@@ -2,4 +2,12 @@
 trigger: always_on
 ---
 
-when user gives you ideas or let you read anything you have to make it properly in the md files so that ideas dont get missout in the folder documents where you have to make new folder if not made "IDEATIONS" where each file have name title and the proper date and time of that in the name of the file so user can easily understand what that file is for..
+When the user provides ideas, you must record them properly to ensure they don't get lost. 
+However, you MUST strictly adhere to the 3-file document structure in the `document/` directory:
+1. `CURRENT_STAGE.md`: For tracking current development progress and completed features.
+2. `PRD.md`: For all features, app goals, long-term developer needs, future features, and the app ecosystem.
+3. `PITCH.md`: For advertisement, demo showcases, and investor pitches detailing short/long term goals.
+
+Do NOT create new folders like "IDEATIONS" or scatter new markdown files. 
+- Put feature/ecosystem ideations into `document/PRD.md`.
+- Put business/demo ideations into `document/PITCH.md`.

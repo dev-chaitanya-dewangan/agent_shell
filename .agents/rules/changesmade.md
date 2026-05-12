@@ -2,4 +2,4 @@
 trigger: always_on
 ---
 
-changes made should be listed in the md file of the current stage md which is created in the document folder in this directory
+Changes made during development should be explicitly listed and updated in the `document/CURRENT_STAGE.md` file. Do not create new markdown files for stage tracking.
